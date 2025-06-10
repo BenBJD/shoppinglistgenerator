@@ -53,14 +53,13 @@ export const FloatingActionButton = ({
   if (!visible) return null;
 
   return (
-    <View className="absolute bottom-6 right-6">
+    <View className="absolute bottom-xl right-xl">
       <Animated.View style={{ transform: [{ scale }] }}>
         <Pressable
           onPress={onPress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          className={`rounded-full justify-center items-center ${colorScheme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'
-            }`}
+          className={`rounded-full justify-center items-center ${colorScheme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}
           style={{
             width: buttonSize,
             height: buttonSize,
@@ -69,9 +68,9 @@ export const FloatingActionButton = ({
               width: 0,
               height: 2,
             },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+            elevation: 3,
           }}
         >
           <MaterialCommunityIcons

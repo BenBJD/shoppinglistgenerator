@@ -9,9 +9,9 @@ export default function TabLayout() {
   const colorScheme = currentTheme.colorScheme;
   return (
     <CustomTabs
-      tabBarClassName={`${colorScheme === 'dark' ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'}`}
-      tabBarIconClassName={`${colorScheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
-      tabBarLabelClassName={`${colorScheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+      tabBarClassName={`${colorScheme === 'dark' ? 'bg-neutral-800 border-neutral-600' : 'bg-white border-neutral-300'}`}
+      tabBarIconClassName={`${colorScheme === 'dark' ? 'text-neutral-200' : 'text-neutral-700'}`}
+      tabBarLabelClassName={`${colorScheme === 'dark' ? 'text-neutral-200' : 'text-neutral-700'}`}
     >
       <Tabs.Screen
         name="index"
@@ -35,6 +35,8 @@ export default function TabLayout() {
   );
 }
 
+// This is a workaround to allow for using NativeWind with the Tabs component
+// Probably not gonna bother doing this for the other components
 type CustomTabsProps = Omit<
   ComponentProps<typeof Tabs> & {
     tabBarStyle?: ViewStyle;

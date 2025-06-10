@@ -10,5 +10,3 @@ export interface Recipe {
     ingredients: Ingredient[];
     portions: number;
 }
-
-export const DEFAULT_PORTIONS = 4;

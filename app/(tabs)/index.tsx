@@ -1,4 +1,4 @@
-import { ShoppingListItem } from "@/components/shoppingList";
+import { ShoppingListItem } from "@/components/ShoppingList";
 import ShoppingListContext from "@/context/shoppingListContext";
 import { Ingredient } from "@/types/recipes";
 import { StatusBar } from "expo-status-bar";
@@ -10,7 +10,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ShoppingListPage() {
   const currentTheme = useColorScheme();
   const colorScheme = currentTheme.colorScheme;
-  const textColor = colorScheme == "dark" ? "text-gray-200" : "text-black"
   const context = useContext(ShoppingListContext);
   if (!context) return <Text>Error loading shopping list</Text>;
   const { items, removeIngredient, clearList, updateIngredientAmount } = context;
@@ -31,7 +30,7 @@ export default function ShoppingListPage() {
     <SafeAreaView className={`h-full ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-white'}`}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <View className="flex-row justify-between items-center mx-5 my-5">
-        <Text className={`text-4xl ${textColor}`}>
+        <Text className={`text-3xl ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>
           Shopping List
         </Text>
         {items.length > 0 && (
@@ -45,7 +44,7 @@ export default function ShoppingListPage() {
       </View>
       {items.length === 0 ? (
         <View className="flex-1 justify-center items-center">
-          <Text className={`text-lg ${textColor}`}>Shopping list is empty.</Text>
+          <Text className={`text-lg ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>Shopping list is empty.</Text>
         </View>
       ) : (
         <FlatList

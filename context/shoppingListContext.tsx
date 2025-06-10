@@ -102,7 +102,6 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
           }
 
           // Calculate the new amount based on remaining recipes
-          // This is a simplified version - you might want to store the original amounts per recipe
           const newAmount = item.amount * (updatedRecipes.length / item.recipes.length);
 
           return {

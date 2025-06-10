@@ -176,7 +176,7 @@ export const RecipesProvider = ({ children }: { children: React.ReactNode }) => 
         if (storedRecipes) {
           setRecipes(JSON.parse(storedRecipes));
         } else {
-          // If no stored recipes, initialize with test data
+          // If no stored recipes, initialise with test data
           setRecipes(testingRecipes);
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(testingRecipes));
         }

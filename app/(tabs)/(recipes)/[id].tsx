@@ -1,5 +1,5 @@
 import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { IngredientListItem } from "@/components/ingredients";
+import { IngredientListItem } from "@/components/Ingredients";
 import RecipesContext from "@/context/recipesContext";
 import ShoppingListContext from "@/context/shoppingListContext";
 import { Ingredient } from "@/types/recipes";
@@ -14,7 +14,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function RecipePage() {
   const currentTheme = useColorScheme();
   const colorScheme = currentTheme.colorScheme;
-  const textColor = colorScheme == "dark" ? "text-gray-200" : "text-black"
   const { id } = useLocalSearchParams();
   const recipesContext = useContext(RecipesContext);
   const shoppingList = useContext(ShoppingListContext);
@@ -34,55 +33,24 @@ export default function RecipePage() {
   const handleAddIngredient = () => {
     if (newIngredient.name && newIngredient.amount > 0) {
       recipesContext.addIngredient(recipe.id, newIngredient);
-
-      // Update shopping list if the recipe is in it
-      const isRecipeInShoppingList = shoppingList.items.some(item =>
-        item.recipes.includes(recipe.name)
-      );
-
-      if (isRecipeInShoppingList) {
-        // First remove the recipe's ingredients
-        shoppingList.removeRecipeIngredients(recipe.name);
-        // Then add all ingredients including the new one
-        shoppingList.addRecipeIngredients(recipe.name, [...recipe.ingredients, newIngredient]);
-      }
-
       setNewIngredient({ name: "", amount: 0, units: "" });
       setIsModalVisible(false);
     }
   };
 
-  const handleRemoveIngredient = (ingredient: Ingredient) => {
-    recipesContext.removeIngredient(recipe.id, ingredient);
-
-    // Update shopping list if the recipe is in it
-    const isRecipeInShoppingList = shoppingList.items.some(item =>
-      item.recipes.includes(recipe.name)
-    );
-
-    if (isRecipeInShoppingList) {
-      // First remove the recipe's ingredients
-      shoppingList.removeRecipeIngredients(recipe.name);
-      // Then add all remaining ingredients
-      const remainingIngredients = recipe.ingredients.filter(ing => ing.name !== ingredient.name);
-      shoppingList.addRecipeIngredients(recipe.name, remainingIngredients);
-    }
-  };
-
-  const handleUpdateIngredient = (updatedIngredient: Ingredient) => {
-    recipesContext.updateRecipe(recipe.id, {
-      ingredients: recipe.ingredients.map(ing =>
-        ing.name === updatedIngredient.name ? updatedIngredient : ing
-      )
-    });
-  };
-
   const renderItem = ({ item }: { item: Ingredient }) => (
     <IngredientListItem
       ingredient={item}
-      onRemove={() => handleRemoveIngredient(item)}
-      onUpdate={handleUpdateIngredient}
       recipeName={recipe.name}
+      onRemove={() => recipesContext.removeIngredient(recipe.id, item)}
+      onUpdate={(updatedIngredient) =>
+        recipesContext.updateRecipe(recipe.id, {
+          ...recipe,
+          ingredients: recipe.ingredients.map(ing =>
+            ing.name === updatedIngredient.name ? updatedIngredient : ing
+          )
+        })
+      }
     />
   );
 
@@ -100,14 +68,19 @@ export default function RecipePage() {
             color={colorScheme === 'dark' ? '#E5E7EB' : '#000000'}
           />
         </Pressable>
-        <Text className={`text-4xl flex-1 ${textColor}`}>
+        <Text className={`text-3xl flex-1 ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>
           {recipe.name}
         </Text>
       </View>
-      <Text className={`text-xl mx-5 mb-2 ${textColor}`}>Ingredients</Text>
+      <View className="flex-row items-center mx-5 mb-4">
+        <Text className={`text-lg ${colorScheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          {recipe.portions} portions
+        </Text>
+      </View>
+      <Text className={`text-xl mx-5 mb-2 ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>Ingredients</Text>
       {recipe.ingredients.length === 0 ? (
         <View className="flex-1 justify-center items-center">
-          <Text className={`text-lg ${textColor}`}>No ingredients yet</Text>
+          <Text className={`text-lg ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>No ingredients yet</Text>
         </View>
       ) : (
         <FlatList
@@ -142,7 +115,7 @@ export default function RecipePage() {
             }}
           >
             <View className="flex-row justify-between items-center mb-4">
-              <Text className={`text-2xl ${textColor}`}>Add Ingredient</Text>
+              <Text className={`text-xl ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>Add Ingredient</Text>
               <Pressable onPress={() => setIsModalVisible(false)}>
                 <MaterialCommunityIcons
                   name="close"
