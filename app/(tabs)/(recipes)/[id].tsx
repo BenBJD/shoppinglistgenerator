@@ -27,14 +27,19 @@ export default function RecipePage() {
     amount: 0,
     units: "",
   });
+  const [amountInput, setAmountInput] = useState("");
 
   if (!recipesContext || !recipe || !shoppingList) return <Text>No recipe found</Text>;
 
   const handleAddIngredient = () => {
-    if (newIngredient.name && newIngredient.amount > 0) {
-      recipesContext.addIngredient(recipe.id, newIngredient);
-      setNewIngredient({ name: "", amount: 0, units: "" });
-      setIsModalVisible(false);
+    if (newIngredient.name && amountInput) {
+      const amount = parseFloat(amountInput);
+      if (!isNaN(amount) && amount > 0) {
+        recipesContext.addIngredient(recipe.id, { ...newIngredient, amount });
+        setNewIngredient({ name: "", amount: 0, units: "" });
+        setAmountInput("");
+        setIsModalVisible(false);
+      }
     }
   };
 
@@ -134,8 +139,13 @@ export default function RecipePage() {
             <View className="flex-row gap-4 mb-4">
               <TextInput
                 className={`flex-1 p-4 rounded-xl ${colorScheme === 'dark' ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-black'}`}
-                value={newIngredient.amount.toString()}
-                onChangeText={(text) => setNewIngredient({ ...newIngredient, amount: parseFloat(text) || 0 })}
+                value={amountInput}
+                onChangeText={(text) => {
+                  if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                    setAmountInput(text);
+                    setNewIngredient({ ...newIngredient, amount: text === '' ? 0 : parseFloat(text) || 0 });
+                  }
+                }}
                 keyboardType="numeric"
                 placeholder="Amount"
                 placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}

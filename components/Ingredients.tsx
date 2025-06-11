@@ -17,21 +17,26 @@ export const IngredientListItem = ({ ingredient, recipeName, onRemove, onUpdate 
   const colorScheme = currentTheme.colorScheme;
   const [isEditing, setIsEditing] = useState(false);
   const [editedIngredient, setEditedIngredient] = useState(ingredient);
+  const [amountInput, setAmountInput] = useState(ingredient.amount.toString());
   const shoppingList = useContext(ShoppingListContext);
 
   const handleSave = () => {
-    onUpdate(editedIngredient);
-    setIsEditing(false);
+    const amount = parseFloat(amountInput);
+    if (!isNaN(amount) && amount > 0) {
+      onUpdate({ ...editedIngredient, amount });
+      setIsEditing(false);
 
-    // Update shopping list if the recipe is in it
-    if (shoppingList) {
-      shoppingList.removeRecipeIngredients(recipeName);
-      shoppingList.addRecipeIngredients(recipeName, [editedIngredient]);
+      // Update shopping list if the recipe is in it
+      if (shoppingList) {
+        shoppingList.removeRecipeIngredients(recipeName);
+        shoppingList.addRecipeIngredients(recipeName, [{ ...editedIngredient, amount }]);
+      }
     }
   };
 
   const handleCancel = () => {
     setEditedIngredient(ingredient);
+    setAmountInput(ingredient.amount.toString());
     setIsEditing(false);
   };
 
@@ -110,8 +115,14 @@ export const IngredientListItem = ({ ingredient, recipeName, onRemove, onUpdate 
             <View className="flex-row gap-4 mb-lg">
               <TextInput
                 className={`flex-1 p-md rounded-lg ${colorScheme === 'dark' ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-black'}`}
-                value={editedIngredient.amount.toString()}
-                onChangeText={(text) => setEditedIngredient({ ...editedIngredient, amount: parseFloat(text) || 0 })}
+                value={amountInput}
+                onChangeText={(text) => {
+                  // Allow empty string, numbers, and one decimal point
+                  if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                    setAmountInput(text);
+                    setEditedIngredient({ ...editedIngredient, amount: text === '' ? 0 : parseFloat(text) || 0 });
+                  }
+                }}
                 keyboardType="numeric"
                 placeholder="Amount"
                 placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}

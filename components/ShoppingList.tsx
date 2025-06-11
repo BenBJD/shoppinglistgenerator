@@ -49,7 +49,16 @@ export const ShoppingListItem = ({ item, onRemove, onUpdate }: ShoppingListItemP
         <View className="flex-1">
           <Text className={`text-xl ${colorScheme === 'dark' ? 'text-gray-200' : 'text-black'}`}>{item.name}</Text>
           <Text className={`text-sm ${colorScheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            {item.amount} {item.units}
+            {item.unitGroups ? (
+              item.unitGroups.map((group, index) => (
+                <Text key={index}>
+                  {group.amount} {group.units}
+                  {index < item.unitGroups!.length - 1 ? ' + ' : ''}
+                </Text>
+              ))
+            ) : (
+              `${item.amount} ${item.units}`
+            )}
           </Text>
           {item.recipes.length > 0 && (
             <Text className={`text-xs ${colorScheme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
@@ -103,7 +112,12 @@ export const ShoppingListItem = ({ item, onRemove, onUpdate }: ShoppingListItemP
             <TextInput
               className={`p-md rounded-lg mb-lg ${colorScheme === 'dark' ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-black'}`}
               value={editedAmount}
-              onChangeText={setEditedAmount}
+              onChangeText={(text) => {
+                // Allow empty string, numbers, and one decimal point
+                if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                  setEditedAmount(text);
+                }
+              }}
               keyboardType="numeric"
               placeholder="Amount"
               placeholderTextColor={colorScheme === 'dark' ? '#9CA3AF' : '#6B7280'}
@@ -111,7 +125,7 @@ export const ShoppingListItem = ({ item, onRemove, onUpdate }: ShoppingListItemP
             <View className="flex-row gap-4">
               <Pressable
                 onPress={handleSave}
-                className={`flex-1 p-md rounded-lg ${colorScheme === 'dark' ? 'bg-green-600' : 'bg-green-500'}`}
+                className={`flex-1 p-md rounded-lg ${colorScheme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}
               >
                 <Text className="text-white text-center text-base font-medium">Update</Text>
               </Pressable>

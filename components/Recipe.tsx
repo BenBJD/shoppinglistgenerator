@@ -17,7 +17,9 @@ export const RecipeListItem = ({ recipe }: { recipe: Recipe }) => {
   const shoppingList = useContext(ShoppingListContext);
 
   // Check if any of this recipe's ingredients are in the shopping list
-  const isInShoppingList = shoppingList?.items.some(item => item.recipes.includes(recipe.name)) ?? false;
+  const isInShoppingList = shoppingList?.items.some(item =>
+    item.recipes.some(recipeName => recipeName.toLowerCase() === recipe.name.toLowerCase())
+  ) ?? false;
 
   const handleDeletePressIn = () => {
     Animated.spring(deleteScale, {

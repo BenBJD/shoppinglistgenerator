@@ -174,7 +174,18 @@ export const RecipesProvider = ({ children }: { children: React.ReactNode }) => 
       try {
         const storedRecipes = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedRecipes) {
-          setRecipes(JSON.parse(storedRecipes));
+          const parsedRecipes = JSON.parse(storedRecipes);
+          // Migrate units to lowercase
+          const migratedRecipes = parsedRecipes.map((recipe: Recipe) => ({
+            ...recipe,
+            ingredients: recipe.ingredients.map((ingredient: Ingredient) => ({
+              ...ingredient,
+              units: ingredient.units?.toLowerCase() || ''
+            }))
+          }));
+          setRecipes(migratedRecipes);
+          // Save migrated recipes back to storage
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migratedRecipes));
         } else {
           // If no stored recipes, initialise with test data
           setRecipes(testingRecipes);

@@ -6,6 +6,7 @@ const STORAGE_KEY = '@shoppingList';
 
 interface ShoppingListItem extends Ingredient {
   recipes: string[]; // Names of recipes this ingredient comes from
+  unitGroups?: { amount: number; units: string }[]; // Store different unit groups separately
 }
 
 interface ShoppingListContextType {
@@ -62,24 +63,55 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
       const newItems = [...prevItems];
 
       ingredients.forEach(ingredient => {
-        // Find if we already have this ingredient
+        // Normalize ingredient name and units
+        const normalizedIngredient = {
+          ...ingredient,
+          name: ingredient.name.toLowerCase(),
+          units: ingredient.units?.toLowerCase() || ''
+        };
+
+        // Find if we already have this ingredient (case insensitive)
         const existingItemIndex = newItems.findIndex(
-          item => item.name === ingredient.name && item.units === ingredient.units
+          item => item.name.toLowerCase() === normalizedIngredient.name
         );
 
         if (existingItemIndex >= 0) {
           // Update existing item
           const existingItem = newItems[existingItemIndex];
-          newItems[existingItemIndex] = {
-            ...existingItem,
-            amount: existingItem.amount + ingredient.amount,
-            recipes: [...existingItem.recipes, recipeName]
-          };
+
+          // If the units are different, combine them
+          if (existingItem.units !== normalizedIngredient.units) {
+            // Create or update unit groups
+            const unitGroups = existingItem.unitGroups || [{ amount: existingItem.amount, units: existingItem.units || '' }];
+            const existingGroupIndex = unitGroups.findIndex(group => group.units === normalizedIngredient.units);
+
+            if (existingGroupIndex >= 0) {
+              // Add to existing group
+              unitGroups[existingGroupIndex].amount += normalizedIngredient.amount;
+            } else {
+              // Add new group
+              unitGroups.push({ amount: normalizedIngredient.amount, units: normalizedIngredient.units || '' });
+            }
+
+            newItems[existingItemIndex] = {
+              ...existingItem,
+              unitGroups,
+              amount: unitGroups.reduce((sum, group) => sum + group.amount, 0),
+              recipes: [...existingItem.recipes, recipeName.toLowerCase()]
+            };
+          } else {
+            // Same units, just add the amounts
+            newItems[existingItemIndex] = {
+              ...existingItem,
+              amount: existingItem.amount + normalizedIngredient.amount,
+              recipes: [...existingItem.recipes, recipeName.toLowerCase()]
+            };
+          }
         } else {
           // Add new item
           newItems.push({
-            ...ingredient,
-            recipes: [recipeName]
+            ...normalizedIngredient,
+            recipes: [recipeName.toLowerCase()]
           });
         }
       });
@@ -91,10 +123,11 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
 
   const removeRecipeIngredients = (recipeName: string) => {
     setItems(prevItems => {
+      const normalizedRecipeName = recipeName.toLowerCase();
       const newItems = prevItems
         .map(item => {
-          // Remove the recipe from the recipes list
-          const updatedRecipes = item.recipes.filter(name => name !== recipeName);
+          // Remove the recipe from the recipes list (case insensitive)
+          const updatedRecipes = item.recipes.filter(name => name.toLowerCase() !== normalizedRecipeName);
 
           // If this was the only recipe for this ingredient, remove the ingredient
           if (updatedRecipes.length === 0) {
@@ -119,7 +152,8 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
 
   const removeIngredient = (ingredientName: string) => {
     setItems(prevItems => {
-      const newItems = prevItems.filter(item => item.name !== ingredientName);
+      const normalizedName = ingredientName.toLowerCase();
+      const newItems = prevItems.filter(item => item.name.toLowerCase() !== normalizedName);
       // Sort items alphabetically by name
       return newItems.sort((a, b) => a.name.localeCompare(b.name));
     });
@@ -127,8 +161,9 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
 
   const updateIngredientAmount = (ingredientName: string, newAmount: number) => {
     setItems(prevItems => {
+      const normalizedName = ingredientName.toLowerCase();
       const newItems = prevItems.map(item => {
-        if (item.name === ingredientName) {
+        if (item.name.toLowerCase() === normalizedName) {
           return {
             ...item,
             amount: newAmount
